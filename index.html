@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>個人成績ランキング（スマホ用）</title>
+<title>個人成績（2026年4月26日現在）</title>
 <style>
 :root{--bg:#0b1220;--card:#111a2b;--text:#e8eefc;--muted:#9fb0d0;--line:#23314f;--pill:#0e2740;--pillline:#1a3b66;--gold:#f7d34a;--silver:#c7d1db;--bronze:#d7a16e;}
-body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;background:var(--bg);color:var(--text);} 
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;background:var(--bg);color:var(--text);}
 header{position:sticky;top:0;background:linear-gradient(180deg, rgba(11,18,32,.98), rgba(11,18,32,.85));backdrop-filter: blur(8px);padding:14px 14px 10px;border-bottom:1px solid var(--line);z-index:10;}
 h1{font-size:16px;margin:0 0 6px;}
 .sub{font-size:12px;color:var(--muted);margin:0;line-height:1.4;}
@@ -25,7 +25,6 @@ input{flex:1;min-width:180px;}
 .rank{font-variant-numeric:tabular-nums;}
 .small{font-size:12px;color:var(--muted);}
 .footer{color:var(--muted);font-size:11px;margin-top:14px;line-height:1.6;}
-
 /* TOP3 cards */
 .top3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;}
 @media (max-width: 720px){.top3{grid-template-columns:1fr;}}
@@ -42,266 +41,220 @@ input{flex:1;min-width:180px;}
 </head>
 <body>
 <header>
-  <h1>個人成績（2026年4月19日現在）</h1>
-  <p class="sub">項目別ランキング（同率同順位：1,2,2,4…）＋TOP3カード表示（🥇🥈🥉）。</p>
+ <h1>個人成績（2026年4月26日現在）</h1>
+ <p class="sub">項目別ランキング（同率同順位：1,2,2,4…）＋TOP3カード表示（🥇🥈🥉）。</p>
 </header>
-
 <div class="wrap">
-  <div class="controls">
-    <label class="pill">項目
-      <select id="metric"></select>
-    </label>
-    <label class="pill">並び
-      <select id="order"></select>
-    </label>
-    <label class="pill">最低打数
-      <select id="minab">
-        <option value="0">指定なし</option>
-        <option value="5">5以上</option>
-        <option value="10">10以上</option>
-        <option value="20">20以上</option>
-      </select>
-    </label>
-    <input id="q" placeholder="選手名で検索（例：しょうご）" />
+ <div class="controls">
+  <label class="pill">項目
+   <select id="metric"></select>
+  </label>
+  <label class="pill">並び
+   <select id="order"></select>
+  </label>
+  <label class="pill">最低打数
+   <select id="minab">
+    <option value="0">指定なし</option>
+    <option value="5">5以上</option>
+    <option value="10">10以上</option>
+    <option value="20">20以上</option>
+   </select>
+  </label>
+  <input id="q" placeholder="選手名で検索（例：しょうご）" />
+ </div>
+ <div class="card">
+  <h2>TOP3 <span class="badge" id="top3Label"></span></h2>
+  <div class="small" id="top3Note"></div>
+  <div class="top3" id="top3"></div>
+ </div>
+ <div class="card" id="rankCard">
+  <h2>ランキング <span class="badge" id="metricLabel"></span></h2>
+  <div class="small" id="note"></div>
+  <div style="overflow:auto; border-radius:12px;">
+   <table class="table" id="rankTable">
+    <thead><tr><th>順位</th><th>選手</th><th id="valHead">値</th><th>打数</th><th>安打</th><th>OPS</th></tr></thead>
+    <tbody></tbody>
+   </table>
   </div>
-
-  <div class="card">
-    <h2>TOP3 <span class="badge" id="top3Label"></span></h2>
-    <div class="small" id="top3Note"></div>
-    <div class="top3" id="top3"></div>
+ </div>
+ <div class="card">
+  <h2>全選手一覧（横スクロール可） <span class="badge">検索と連動</span></h2>
+  <div style="overflow:auto; border-radius:12px;">
+   <table class="table" id="allTable">
+    <thead></thead>
+    <tbody></tbody>
+   </table>
   </div>
-
-  <div class="card" id="rankCard">
-    <h2>ランキング <span class="badge" id="metricLabel"></span></h2>
-    <div class="small" id="note"></div>
-    <div style="overflow:auto; border-radius:12px;">
-      <table class="table" id="rankTable">
-        <thead><tr><th>順位</th><th>選手</th><th id="valHead">値</th><th>打数</th><th>安打</th><th>OPS</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>全選手一覧（横スクロール可） <span class="badge">検索と連動</span></h2>
-    <div style="overflow:auto; border-radius:12px;">
-      <table class="table" id="allTable">
-        <thead></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="footer">
-    ■個人運用（無料）：Excel更新 → このHTMLを再生成して配布（AirDrop/LINE/メールなど） or 無料ホスティングに上書き。<br/>
-    ■注意：打数が少ない選手は率が上下しやすいので「最低打数」フィルタが有効です。
-  </div>
+ </div>
+ <div class="footer">
+  ■個人運用（無料）：Excel更新 → このHTMLを再生成して配布（AirDrop/LINE/メールなど） or 無料ホスティングに上書き。<br/>
+  ■注意：打数が少ない選手は率が上下しやすいので「最低打数」フィルタが有効です。
+ </div>
 </div>
-
 <script>
-const data = [{"選手": "りょう", "打率": 0.857142857142857, "打数": 7, "安打": 6, "単打": 2, "二塁打": 4, "三塁打": null, "本塁打": null, "打点": 3, "四球": null, "死球": null, "犠打": null, "犠飛": null, "盗塁": 3, "三振": null, "出塁率": 0.857142857142857, "長打率": 1.42857142857143, "OPS": 2.28571428571429}, {"選手": "のあ", "打率": 0.111111111111111, "打数": 9, "安打": 1, "単打": 1, "二塁打": null, "三塁打": null, "本塁打": null, "打点": 1, "四球": null, "死球": null, "犠打": null, "犠飛": null, "盗塁": null, "三振": 2, "出塁率": 0.111111111111111, "長打率": 0.111111111111111, "OPS": 0.222222222222222}, {"選手": "しょうご", "打率": 0.375, "打数": 56, "安打": 21, "単打": 15, "二塁打": 6, "三塁打": null, "本塁打": null, "打点": 16, "四球": 4, "死球": null, "犠打": 1, "犠飛": null, "盗塁": 7, "三振": 4, "出塁率": 0.416666666666667, "長打率": 0.482142857142857, "OPS": 0.898809523809524}, {"選手": "あんり", "打率": 0.282051282051282, "打数": 39, "安打": 11, "単打": 9, "二塁打": 2, "三塁打": null, "本塁打": null, "打点": 8, "四球": 8, "死球": null, "犠打": 4, "犠飛": 1, "盗塁": 9, "三振": 2, "出塁率": 0.395833333333333, "長打率": 0.333333333333333, "OPS": 0.729166666666666}, {"選手": "けんた", "打率": 0.153846153846154, "打数": 26, "安打": 4, "単打": 3, "二塁打": 1, "三塁打": null, "本塁打": null, "打点": 5, "四球": 9, "死球": 1, "犠打": 3, "犠飛": null, "盗塁": 9, "三振": 2, "出塁率": 0.388888888888889, "長打率": 0.192307692307692, "OPS": 0.581196581196581}, {"選手": "ひなた", "打率": 0.235294117647059, "打数": 34, "安打": 8, "単打": 7, "二塁打": 1, "三塁打": null, "本塁打": null, "打点": 9, "四球": 3, "死球": 5, "犠打": 4, "犠飛": null, "盗塁": 10, "三振": null, "出塁率": 0.380952380952381, "長打率": 0.264705882352941, "OPS": 0.645658263305322}, {"選手": "はると", "打率": 0.222222222222222, "打数": 36, "安打": 8, "単打": 7, "二塁打": 1, "三塁打": null, "本塁打": null, "打点": 6, "四球": 6, "死球": null, "犠打": null, "犠飛": null, "盗塁": 5, "三振": 5, "出塁率": 0.333333333333333, "長打率": 0.25, "OPS": 0.583333333333333}, {"選手": "かずま", "打率": 0.128205128205128, "打数": 39, "安打": 5, "単打": 3, "二塁打": 1, "三塁打": 1, "本塁打": null, "打点": 5, "四球": 9, "死球": 2, "犠打": 4, "犠飛": null, "盗塁": 13, "三振": 11, "出塁率": 0.32, "長打率": 0.205128205128205, "OPS": 0.525128205128205}, {"選手": "たいち", "打率": 0.216216216216216, "打数": 37, "安打": 8, "単打": 7, "二塁打": 1, "三塁打": null, "本塁打": null, "打点": 5, "四球": 15, "死球": 4, "犠打": 3, "犠飛": null, "盗塁": 23, "三振": 5, "出塁率": 0.482142857142857, "長打率": 0.243243243243243, "OPS": 0.7253861003861}, {"選手": "りゅうや", "打率": 0.268292682926829, "打数": 41, "安打": 11, "単打": 9, "二塁打": 2, "三塁打": null, "本塁打": null, "打点": 11, "四球": 10, "死球": 2, "犠打": 4, "犠飛": 1, "盗塁": 9, "三振": 11, "出塁率": 0.425925925925926, "長打率": 0.317073170731707, "OPS": 0.742999096657633}, {"選手": "りょうえい", "打率": 0.352941176470588, "打数": 51, "安打": 18, "単打": 12, "二塁打": 4, "三塁打": 2, "本塁打": null, "打点": 12, "四球": 5, "死球": null, "犠打": null, "犠飛": null, "盗塁": 10, "三振": 13, "出塁率": 0.410714285714286, "長打率": 0.509803921568627, "OPS": 0.920518207282913}, {"選手": "ゆうご", "打率": null, "打数": 0, "安打": null, "単打": null, "二塁打": null, "三塁打": null, "本塁打": null, "打点": null, "四球": 2, "死球": null, "犠打": null, "犠飛": null, "盗塁": null, "三振": null, "出塁率": 1, "長打率": null, "OPS": null}, {"選手": "りょうま", "打率": 0, "打数": 2, "安打": null, "単打": null, "二塁打": null, "三塁打": null, "本塁打": null, "打点": null, "四球": null, "死球": null, "犠打": null, "犠飛": null, "盗塁": 1, "三振": 2, "出塁率": 0, "長打率": 0, "OPS": 0}, {"選手": "しょうたろう", "打率": 0, "打数": 1, "安打": null, "単打": null, "二塁打": null, "三塁打": null, "本塁打": null, "打点": null, "四球": 1, "死球": null, "犠打": null, "犠飛": null, "盗塁": null, "三振": null, "出塁率": 0.5, "長打率": 0, "OPS": 0.5}];
-const team = {"打数": 0.267195767195767, "安打": 378, "単打": 101, "二塁打": 75, "三塁打": 23, "本塁打": 3, "打点": 0, "四球": 81, "死球": 72, "犠打": 14, "犠飛": 23, "盗塁": 2, "三振": 99, "出塁率": 57, "長打率": 0.401287553648069, "OPS": 0.343915343915344};
-const allCols = ["選手", "打率", "打数", "安打", "単打", "二塁打", "三塁打", "本塁打", "打点", "四球", "死球", "犠打", "犠飛", "盗塁", "三振", "出塁率", "長打率", "OPS"];
-const metrics = ["打率", "出塁率", "長打率", "OPS", "打点", "本塁打", "盗塁", "三振", "安打", "二塁打", "三塁打", "四球", "死球"];
-const defaultOrder = {"打率": "desc", "出塁率": "desc", "長打率": "desc", "OPS": "desc", "打点": "desc", "本塁打": "desc", "盗塁": "desc", "三振": "asc", "安打": "desc", "二塁打": "desc", "三塁打": "desc", "四球": "desc", "死球": "desc"};
-const fmtCols = new Set(["打率", "出塁率", "長打率", "OPS"]);
-
+const data = [{"選手": "りょう", "打率": 0.6666666666666666, "打数": 12, "安打": 8, "単打": 2, "二塁打": 6, "三塁打": null, "本塁打": null, "打点": 7, "四球": null, "死球": null, "犠打": null, "犠飛": null, "盗塁": 4, "三振": 1, "出塁率": 0.6666666666666666, "長打率": 1.1666666666666667, "OPS": 1.8333333333333335}, {"選手": "のあ", "打率": 0.1, "打数": 10, "安打": 1, "単打": 1, "二塁打": null, "三塁打": null, "本塁打": null, "打点": 1, "四球": null, "死球": null, "犠打": null, "犠飛": null, "盗塁": null, "三振": 4, "出塁率": 0.1, "長打率": 0.1, "OPS": 0.2}, {"選手": "しょうご", "打率": 0.38333333333333336, "打数": 60, "安打": 23, "単打": 17, "二塁打": 6, "三塁打": null, "本塁打": null, "打点": 16, "四球": 5, "死球": null, "犠打": 1, "犠飛": null, "盗塁": 8, "三振": 4, "出塁率": 0.4307692307692308, "長打率": 0.48333333333333334, "OPS": 0.9141025641025642}, {"選手": "あんり", "打率": 0.29545454545454547, "打数": 44, "安打": 13, "単打": 11, "二塁打": 2, "三塁打": null, "本塁打": null, "打点": 8, "四球": 8, "死球": null, "犠打": 4, "犠飛": 1, "盗塁": 10, "三振": 2, "出塁率": 0.39622641509433965, "長打率": 0.3409090909090909, "OPS": 0.7371355060034306}, {"選手": "けんた", "打率": 0.14814814814814814, "打数": 27, "安打": 4, "単打": 3, "二塁打": 1, "三塁打": null, "本塁打": null, "打点": 5, "四球": 9, "死球": 1, "犠打": 3, "犠飛": null, "盗塁": 9, "三振": 2, "出塁率": 0.3783783783783784, "長打率": 0.18518518518518517, "OPS": 0.5635635635635636}, {"選手": "ひなた", "打率": 0.2222222222222222, "打数": 36, "安打": 8, "単打": 7, "二塁打": 1, "三塁打": null, "本塁打": null, "打点": 9, "四球": 3, "死球": 5, "犠打": 5, "犠飛": null, "盗塁": 10, "三振": null, "出塁率": 0.36363636363636365, "長打率": 0.25, "OPS": 0.6136363636363636}, {"選手": "はると", "打率": 0.23684210526315788, "打数": 38, "安打": 9, "単打": 8, "二塁打": 1, "三塁打": null, "本塁打": null, "打点": 6, "四球": 8, "死球": null, "犠打": null, "犠飛": null, "盗塁": 5, "三振": 5, "出塁率": 0.3695652173913043, "長打率": 0.2631578947368421, "OPS": 0.6327231121281465}, {"選手": "かずま", "打率": 0.11904761904761904, "打数": 42, "安打": 5, "単打": 3, "二塁打": 1, "三塁打": 1, "本塁打": null, "打点": 5, "四球": 9, "死球": 2, "犠打": 4, "犠飛": null, "盗塁": 13, "三振": 11, "出塁率": 0.3018867924528302, "長打率": 0.19047619047619047, "OPS": 0.49236298292902064}, {"選手": "たいち", "打率": 0.19047619047619047, "打数": 42, "安打": 8, "単打": 7, "二塁打": 1, "三塁打": null, "本塁打": null, "打点": 5, "四球": 16, "死球": 4, "犠打": 3, "犠飛": null, "盗塁": 24, "三振": 5, "出塁率": 0.45161290322580644, "長打率": 0.21428571428571427, "OPS": 0.6658986175115207}, {"選手": "りゅうや", "打率": 0.29545454545454547, "打数": 44, "安打": 13, "単打": 11, "二塁打": 2, "三塁打": null, "本塁打": null, "打点": 12, "四球": 11, "死球": 2, "犠打": 4, "犠飛": 1, "盗塁": 11, "三振": 11, "出塁率": 0.4482758620689655, "長打率": 0.3409090909090909, "OPS": 0.7891849529780564}, {"選手": "りょうえい", "打率": 0.38181818181818183, "打数": 55, "安打": 21, "単打": 14, "二塁打": 5, "三塁打": 2, "本塁打": null, "打点": 14, "四球": 5, "死球": null, "犠打": null, "犠飛": null, "盗塁": 12, "三振": 13, "出塁率": 0.43333333333333335, "長打率": 0.5454545454545454, "OPS": 0.9787878787878788}, {"選手": "ゆうご", "打率": null, "打数": 0, "安打": null, "単打": null, "二塁打": null, "三塁打": null, "本塁打": null, "打点": null, "四球": 2, "死球": null, "犠打": null, "犠飛": null, "盗塁": null, "三振": null, "出塁率": 1, "長打率": null, "OPS": null}, {"選手": "りょうま", "打率": 0, "打数": 2, "安打": null, "単打": null, "二塁打": null, "三塁打": null, "本塁打": null, "打点": null, "四球": null, "死球": null, "犠打": null, "犠飛": null, "盗塁": 1, "三振": 2, "出塁率": 0, "長打率": 0, "OPS": 0}, {"選手": "しょうたろう", "打率": 0, "打数": 1, "安打": null, "単打": null, "二塁打": null, "三塁打": null, "本塁打": null, "打点": null, "四球": 1, "死球": null, "犠打": null, "犠飛": null, "盗塁": null, "三振": null, "出塁率": 0.5, "長打率": 0, "OPS": 0.5}];
+const team = {"打数": 0.2736077481840194, "安打": 413, "単打": 113, "二塁打": 84, "三塁打": 26, "本塁打": 3, "打点": 0, "四球": 88, "死球": 77, "犠打": 14, "犠飛": 24, "盗塁": 2, "三振": 107, "出塁率": 60, "長打率": 0.4031620553359684, "OPS": 0.35108958837772397};
+const allCols = ["選手","打率","打数","安打","単打","二塁打","三塁打","本塁打","打点","四球","死球","犠打","犠飛","盗塁","三振","出塁率","長打率","OPS"];
+const metrics = ["打率","出塁率","長打率","OPS","打点","本塁打","盗塁","三振","安打","二塁打","三塁打","四球","死球"];
+const defaultOrder = {"打率":"desc","出塁率":"desc","長打率":"desc","OPS":"desc","打点":"desc","本塁打":"desc","盗塁":"desc","三振":"asc","安打":"desc","二塁打":"desc","三塁打":"desc","四球":"desc","死球":"desc"};
+const fmtCols = new Set(["打率","出塁率","長打率","OPS"]);
 function fmt(col, val){
-  if (val===null || val===undefined || Number.isNaN(val)) return '';
-  if (fmtCols.has(col)){
-    let s = val.toFixed(3);
-    s = s.replace(/\.0+$/,'').replace(/(\.[0-9]*?)0+$/,'$1');
-    return s;
-  }
-  if (Math.abs(val - Math.round(val)) < 1e-9) return String(Math.round(val));
-  return String(val);
+ if (val===null || val===undefined || Number.isNaN(val)) return '';
+ if (fmtCols.has(col)){
+  let s = Number(val).toFixed(3);
+  s = s.replace(/\.0+$/,'').replace(/(\.[0-9]*?)0+$/,'$1');
+  return s;
+ }
+ if (Math.abs(Number(val) - Math.round(Number(val))) < 1e-9) return String(Math.round(Number(val)));
+ return String(val);
 }
-
 function computeCompetitionRanks(rows, key){
-  // 同率同順位（competition ranking: 1,2,2,4…）
-  let prev = null;
-  let currentRank = 0;
-  rows.forEach((r, idx)=>{
-    const v = r[key];
-    if (prev === null || v !== prev){
-      currentRank = idx + 1;
-      prev = v;
-    }
-    r.__rank = currentRank;
-  });
+ let prev = null;
+ let currentRank = 0;
+ rows.forEach((r, idx)=>{
+  const v = r[key];
+  if (prev === null || v !== prev){
+   currentRank = idx + 1;
+   prev = v;
+  }
+  r.__rank = currentRank;
+ });
 }
-
 function groupByRank(rows){
-  // rankごとにまとめる（同率の場合は複数名をまとめてTOP3カードに表示）
-  const groups = [];
-  let current = null;
-  rows.forEach(r=>{
-    if (!current || current.rank !== r.__rank){
-      current = {rank:r.__rank, value:r.__value, players:[r]};
-      groups.push(current);
-    } else {
-      current.players.push(r);
-    }
-  });
-  return groups;
+ const groups = [];
+ let current = null;
+ rows.forEach(r=>{
+  if (!current || current.rank !== r.__rank){
+   current = {rank:r.__rank, value:r.__value, players:[r]};
+   groups.push(current);
+  } else {
+   current.players.push(r);
+  }
+ });
+ return groups;
 }
-
 const metricSel = document.getElementById('metric');
-const orderSel  = document.getElementById('order');
-const minabSel  = document.getElementById('minab');
-
+const orderSel = document.getElementById('order');
+const minabSel = document.getElementById('minab');
 metrics.forEach(m=>{
-  const o=document.createElement('option');
-  o.value=m; o.textContent=m;
-  metricSel.appendChild(o);
+ const o=document.createElement('option');
+ o.value=m; o.textContent=m;
+ metricSel.appendChild(o);
 });
 metricSel.value = metrics[0];
-
 function setOrderOptions(metric){
-  orderSel.innerHTML='';
-  const o1=document.createElement('option'); o1.value='desc'; o1.textContent='多い/高い順（↓）';
-  const o2=document.createElement('option'); o2.value='asc';  o2.textContent='少ない/低い順（↑）';
-  orderSel.appendChild(o1); orderSel.appendChild(o2);
-  orderSel.value = (defaultOrder[metric] || 'desc');
+ orderSel.innerHTML='';
+ const o1=document.createElement('option'); o1.value='desc'; o1.textContent='多い/高い順（↓）';
+ const o2=document.createElement('option'); o2.value='asc'; o2.textContent='少ない/低い順（↑）';
+ orderSel.appendChild(o1); orderSel.appendChild(o2);
+ orderSel.value = (defaultOrder[metric] || 'desc');
 }
 setOrderOptions(metricSel.value);
-
 function renderAllTable(filterText=''){
-  const thead=document.querySelector('#allTable thead');
-  const tbody=document.querySelector('#allTable tbody');
-  thead.innerHTML=''; tbody.innerHTML='';
-
-  const trh=document.createElement('tr');
+ const thead=document.querySelector('#allTable thead');
+ const tbody=document.querySelector('#allTable tbody');
+ thead.innerHTML=''; tbody.innerHTML='';
+ const trh=document.createElement('tr');
+ allCols.forEach(c=>{
+  const th=document.createElement('th'); th.textContent=c; trh.appendChild(th);
+ });
+ thead.appendChild(trh);
+ const rows = data.filter(r=> !filterText || String(r['選手']).includes(filterText));
+ rows.forEach(r=>{
+  const tr=document.createElement('tr');
   allCols.forEach(c=>{
-    const th=document.createElement('th'); th.textContent=c; trh.appendChild(th);
+   const td=document.createElement('td');
+   td.textContent = (c==='選手') ? r[c] : fmt(c, r[c]);
+   tr.appendChild(td);
   });
-  thead.appendChild(trh);
-
-  const rows = data.filter(r=> !filterText || String(r['選手']).includes(filterText));
-  rows.forEach(r=>{
-    const tr=document.createElement('tr');
-    allCols.forEach(c=>{
-      const td=document.createElement('td');
-      td.textContent = (c==='選手') ? r[c] : fmt(c, r[c]);
-      tr.appendChild(td);
-    });
-    tbody.appendChild(tr);
-  });
+  tbody.appendChild(tr);
+ });
 }
-
 function renderTop3(groups, key){
-  const top3Div = document.getElementById('top3');
-  top3Div.innerHTML='';
-
-  const medals = [
-    {rank:1, cls:'gold',   icon:'🥇', title:'1位'},
-    {rank:2, cls:'silver', icon:'🥈', title:'2位'},
-    {rank:3, cls:'bronze', icon:'🥉', title:'3位'},
-  ];
-
-  medals.forEach(m=>{
-    const g = groups.find(x=>x.rank===m.rank);
-    const card = document.createElement('div');
-    card.className = `medalCard ${m.cls}`;
-
-    const header = document.createElement('div');
-    header.className='medalHeader';
-    const t = document.createElement('div');
-    t.className='medalTitle';
-    t.textContent = m.title;
-    const ic = document.createElement('div');
-    ic.className='medalIcon';
-    ic.textContent = m.icon;
-    header.appendChild(t); header.appendChild(ic);
-
-    const val = document.createElement('div');
-    val.className='medalValue';
-    const names = document.createElement('div');
-    names.className='medalName';
-
-    if (!g){
-      val.textContent = '—';
-      names.textContent = '該当なし';
-    } else {
-      val.textContent = fmt(key, g.value);
-      names.textContent = g.players.map(p=>p['選手']).join(' / ');
-    }
-
-    card.appendChild(header);
-    card.appendChild(val);
-    card.appendChild(names);
-    top3Div.appendChild(card);
-  });
+ const top3Div = document.getElementById('top3');
+ top3Div.innerHTML='';
+ const medals = [
+  {rank:1, cls:'gold', icon:'🥇', title:'1位'},
+  {rank:2, cls:'silver', icon:'🥈', title:'2位'},
+  {rank:3, cls:'bronze', icon:'🥉', title:'3位'},
+ ];
+ medals.forEach(m=>{
+  const g = groups.find(x=>x.rank===m.rank);
+  const card = document.createElement('div');
+  card.className = `medalCard ${m.cls}`;
+  const header = document.createElement('div'); header.className='medalHeader';
+  const t = document.createElement('div'); t.className='medalTitle'; t.textContent=m.title;
+  const ic = document.createElement('div'); ic.className='medalIcon'; ic.textContent=m.icon;
+  header.appendChild(t); header.appendChild(ic);
+  const val = document.createElement('div'); val.className='medalValue';
+  const names = document.createElement('div'); names.className='medalName';
+  if (!g){
+   val.textContent='—';
+   names.textContent='該当なし';
+  } else {
+   val.textContent = fmt(key, g.value);
+   names.textContent = g.players.map(p=>p['選手']).join(' / ');
+  }
+  card.appendChild(header);
+  card.appendChild(val);
+  card.appendChild(names);
+  top3Div.appendChild(card);
+ });
 }
-
 function renderRanking(){
-  const key=metricSel.value;
-  const order=orderSel.value;
-  const q=document.getElementById('q').value.trim();
-  const minab=parseInt(minabSel.value,10);
-
-  document.getElementById('metricLabel').textContent = key;
-  document.getElementById('valHead').textContent = key;
-  document.getElementById('top3Label').textContent = key;
-
-  let rows = data
-    .filter(r=> r[key]!==null && r[key]!==undefined && !Number.isNaN(r[key]))
-    .filter(r=> !q || String(r['選手']).includes(q));
-
-  if (!Number.isNaN(minab) && minab>0){
-    rows = rows.filter(r=> (r['打数']||0) >= minab);
-  }
-
-  rows.sort((a,b)=>{
-    const va=a[key], vb=b[key];
-    return order==='asc' ? (va-vb) : (vb-va);
+ const key=metricSel.value;
+ const order=orderSel.value;
+ const q=document.getElementById('q').value.trim();
+ const minab=parseInt(minabSel.value,10);
+ document.getElementById('metricLabel').textContent = key;
+ document.getElementById('valHead').textContent = key;
+ document.getElementById('top3Label').textContent = key;
+ let rows = data
+  .filter(r=> r[key]!==null && r[key]!==undefined && !Number.isNaN(r[key]))
+  .filter(r=> !q || String(r['選手']).includes(q));
+ if (!Number.isNaN(minab) && minab>0){
+  rows = rows.filter(r=> (r['打数']||0) >= minab);
+ }
+ rows.sort((a,b)=>{
+  const va=a[key], vb=b[key];
+  return order==='asc' ? (va-vb) : (vb-va);
+ });
+ rows.forEach(r=>{ r.__value = r[key]; });
+ computeCompetitionRanks(rows, key);
+ const groups = groupByRank(rows);
+ renderTop3(groups, key);
+ let note='';
+ if (team && team[key]!=null && team[key]!==undefined && !Number.isNaN(team[key])){
+  note = `チーム（合計行）: ${key} = ${fmt(key,team[key])}`;
+ }
+ if (minab>0){
+  note = (note? (note+' / ') : '') + `最低打数：${minab} 以上`;
+ }
+ document.getElementById('note').textContent = note;
+ document.getElementById('top3Note').textContent = note;
+ const tbody=document.querySelector('#rankTable tbody');
+ tbody.innerHTML='';
+ rows.forEach((r)=>{
+  const tr=document.createElement('tr');
+  const cells=[
+   {val:String(r.__rank), cls:'rank'},
+   {val:r['選手'], left:true},
+   {val:fmt(key,r[key])},
+   {val:fmt('打数', r['打数'])},
+   {val:fmt('安打', r['安打'])},
+   {val:fmt('OPS', r['OPS'])},
+  ];
+  cells.forEach(c=>{
+   const td=document.createElement('td');
+   td.textContent=c.val;
+   if (c.left) td.style.textAlign='left';
+   if (c.cls) td.className=c.cls;
+   tr.appendChild(td);
   });
-
-  // keep value for grouping
-  rows.forEach(r=>{ r.__value = r[key]; });
-  computeCompetitionRanks(rows, key);
-
-  // TOP3 groups by rank 1/2/3
-  const groups = groupByRank(rows);
-  renderTop3(groups, key);
-
-  // note
-  let note='';
-  if (team && team[key]!=null && team[key]!==undefined && !Number.isNaN(team[key])){
-    note = `チーム（合計行）: ${key} = ${fmt(key,team[key])}`;
-  }
-  if (minab>0){
-    note = (note? (note+' / ') : '') + `最低打数：${minab} 以上`;
-  }
-  document.getElementById('note').textContent = note;
-  document.getElementById('top3Note').textContent = note;
-
-  // table
-  const tbody=document.querySelector('#rankTable tbody');
-  tbody.innerHTML='';
-  rows.forEach((r)=>{
-    const tr=document.createElement('tr');
-    const cells=[
-      {val:String(r.__rank), cls:'rank'},
-      {val:r['選手'], left:true},
-      {val:fmt(key,r[key])},
-      {val:fmt('打数', r['打数'])},
-      {val:fmt('安打', r['安打'])},
-      {val:fmt('OPS', r['OPS'])},
-    ];
-    cells.forEach(c=>{
-      const td=document.createElement('td');
-      td.textContent=c.val;
-      if (c.left) td.style.textAlign='left';
-      if (c.cls) td.className=c.cls;
-      tr.appendChild(td);
-    });
-    tbody.appendChild(tr);
-  });
-
-  renderAllTable(q);
+  tbody.appendChild(tr);
+ });
+ renderAllTable(q);
 }
-
 metricSel.addEventListener('input', ()=>{ setOrderOptions(metricSel.value); renderRanking(); });
 ['order','minab','q'].forEach(id=>{ document.getElementById(id).addEventListener('input', renderRanking); });
 renderRanking();
